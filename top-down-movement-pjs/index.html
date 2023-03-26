@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Top-Down Movement #TT</title>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Abril+Fatface:wght@400&family=JetBrains+Mono&family=Open+Sans:wght@400;700&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/icon?family=Material+Icons"
+        />
+
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/atom-one-dark.min.css"
+        />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+        <script>
+            hljs.initHighlightingOnLoad();
+        </script>
+
+        <link rel="stylesheet" href="src/style.css"></link>
+    </head>
+    <body>
+        <div class="hero">
+            <h1>Top-Down Movement</h1>
+            <h2>Tutorial Tuesday</h2>
+        </div>
+        <h3>Introduction</h3>
+        <p>
+            Welcome to my new series, Tutorial Tuesday! It's a challenge to
+            myself to put out a quality tutorial every week on Tuesday. This
+            week, inspired by my recent escapades into memes involving top-down
+            movement, I've decided to put out a tutorial detailing how and why
+            my method for this works. Let's jump right in.
+        </p>
+        <p class="small">
+            This tutorial is written and intended for beginners. If you're not a
+            beginner, you might find that much of the material is below you. If
+            this is the case, don't just leave. Take the time to find something
+            to add and leave a comment to help us all learn :)
+        </p>
+        <h3>Definitions</h3>
+        <p>
+            What do I mean by top-down movement? It's movement, usually
+            incorporated into a game, where the object in question is seen from
+            the <b>top-down</b>, so from their top to their bottom. It's kind of
+            like having a drone above the player that stays exactly above it at
+            all times and looks down. The concept might be familiar if you've
+            ever played an io game, as many of them follow this principle.
+        </p>
+        <p>
+            How to make something like this? Actually pretty simple. It's all
+            about using some base game development principles in the right ways.
+            The principles in question?
+        </p>
+        <ul>
+            <li>instant keypress detection</li>
+            <li>velocity and movement</li>
+            <li>player object</li>
+        </ul>
+        <p>
+            Aren't familiar with one or more of these? No sweat, I'll be going
+            over each in more detail as we work through. Let's start with key
+            detection.
+        </p>
+        <h3>Key Handling</h3>
+        <p>
+            I've discussed this method in detail before, but I still see people
+            doing this so I'm gonna do it again.
+        </p>
+        <p>
+            PJS provides two functions that we need: <code>keyPressed</code> and
+            <code>keyReleased</code>. But we can't just work with these alone:
+            we need a new variable to hold all of the keypress actions. I'm
+            going with an object because it's more efficient.
+        </p>
+        <pre><code>
+  var keys = {};
+        </code></pre>
+        <p>
+            Nice, that's simple. That variable will hold all of the actions we
+            want. Now, let's add the following code.
+        </p>
+        <pre><code>
+  var keys = {};
+  keyPressed = function() {
+    keys[keyCode] = true;
+  };
+  keyReleased = function() {
+    keys[keyCode] = false;
+  };
+        </code></pre>
+        <p>
+            And that's the ballgame. Those seven lines of code are all you need
+            to create robust games that require key input, like the example
+            we're about to make. To see more about how it works, head over
+            <a
+                href="https://www.khanacademy.org/computer-programming/key-detector-example/6637985703706624"
+                target="_blank"
+                >here</a
+            >.
+        </p>
+        <h3>Velocity and Player Movement</h3>
+        <p>
+            In order to actually rig things up, we're going to need to go deeper
+            into objects - so I'll save that for a bit. Here's how making the
+            player move would actually work.
+        </p>
+        <ol>
+            <li>
+                First, how would the player move? We'll accomplish this by
+                hooking the key events up to the player's position so that
+                pressing arrow keys will change the position.
+            </li>
+            <li>
+                But wait - I was promised smooth movement. Changing just the x
+                and y won't give me smooth movement. We'll solve this issue with
+                velocities (xv and yv).
+            </li>
+            <li>
+                How about when the player hits the edges? We'll solve this using
+                the built-in PJS <code>constrain</code> function.
+            </li>
+        </ol>
+        <p>
+            Let's get started with the first point - changing the x and y of the
+            player. Writing out some pseudocode we would get the following.
+        </p>
+        <pre><code>
+    variable keys (holds the keypress actions)
+
+    inside the player function:
+        if up arrow pressed:
+            change player y by -1
+        if down arrow pressed:
+            change player y by 1
+        if left arrow pressed:
+            change player x by -1
+        if right arrow pressed
+            change player x by 1
+        </code></pre>
+        <p class="small">
+            Wait, what's pseudocode? Good question! It's not real code that the
+            computer can understand, but rather it's a rough mock-up of the
+            steps our program would take to get to our desired output. If you're
+            writing a huge algorithm, do you think you're really just going to
+            sit down and write it up first try? No way! Using pseudocode can
+            help us organize our thoughts in a code-ish way so that it's easier
+            to translate those thoughts to actual code later.
+        </p>
+        <p class="small">
+            Another note - there are actual standards for pseudocode, but if you
+            know me you might know that I'm not terribly fond of following hard
+            rules. I use my own pseudocode in this lesson, but your pseudocode
+            can look however you want it to as long as it accomplishes its
+            purpose. Get in the habit of writing it before any program - I
+            promise it'll speed up development time.
+        </p>
+        <p>
+            So that's nice. But it honestly won't end up looking very smooth,
+            because smooth movement is about gradually slowing to a stop - not
+            suddenly stopping whenever the key is not being held down. Let's
+            make it smooth with velocity.
+        </p>
+        <pre><code>
+    variable keys (holds the keypress actions)
+    
+    inside the player function:
+        if up arrow pressed:
+            change player yv by -1
+        if down arrow pressed:
+            change player yv by 1
+        if left arrow pressed:
+            change player xv by -1
+        if right arrow pressed
+            change player xv by 1
+
+        change player x by player xv
+        change player y by player yv
+
+        slowly decrease player xv
+        slowly decrease player yv
+        </code></pre>
+        <p>
+            Now this is super important. By using a separate variable and
+            changing the position by that variable, we'll achieve smoother
+            movement when we gradually scale the velocity down.
+        </p>
+        <p class="small">
+            Could you use vectors? Yes, of course you could use vectors. Should
+            you use vectors? Maybe. Depends on your skill level. I'm going to be
+            completely honest though, this works absolutely fine. Just save me
+            heartache and don't use PVector. It's so slow you're better off
+            using separate variables like this.
+        </p>
+        <p>
+            You know what's funny? That's it. Wait - almost it, I lied. We have
+            to incorporate one more tiny detail in our pseudocode - constraining
+            the player to inside the canvas.
+        </p>
+        <pre><code>
+    variable keys (holds the keypress actions)
+        
+    inside the player function:
+        if up arrow pressed:
+            change player yv by -1
+        if down arrow pressed:
+            change player yv by 1
+        if left arrow pressed:
+            change player xv by -1
+        if right arrow pressed
+            change player xv by 1
+
+        change player x by player xv
+        change player y by player yv
+
+        slowly decrease player xv
+        slowly decrease player yv
+
+        clamp player x in range (player width / 2, width of canvas - player width / 2)
+        </code></pre>
+        <p>
+            So that's nice. Just a small note, the constraining was made with
+            centered rectangles in mind - so I'll need to make sure to center my
+            player when I draw him. Let's get into the OOP.
+        </p>
+        <h3>Making the Player Object</h3>
+        <p>
+            Making the object won't be terribly difficult if you're familiar
+            with objects - in fact, we've already covered objects by talking
+            about the key detector (<code>keys</code> is an object). Let's begin
+            by creating a simple player object.
+        </p>
+
+        <pre><code>
+    var player = {
+        x: width / 2,
+        y: height / 2,
+        w: 40,
+        h: 40
+    };
+        </code></pre>
+        <p>
+            Just to let you know if you weren't aware, <code>width</code> and
+            <code>height</code> are the width and height of the PJS canvas. Now,
+            we make a draw and move function incorporating our pseudocode
+            translated to JS code.
+        </p>
+        <pre><code>
+    var player = {
+        x: width / 2,
+        y: height / 2,
+        w: 40,
+        h: 40,
+
+        xv: 0,
+        yv: 0,
+
+        draw: function() {
+            noStroke();
+            fill(0, 0, 0);
+            rect(x, y, w, h);
+        },
+        move: function() {
+            if (keys[LEFT]) {
+                this.xv--;
+            }
+            if (keys[RIGHT]) {
+                this.xv++;
+            }
+            if (keys[UP]) {
+                this.yv--;
+            }
+            if (keys[DOWN]) {
+                this.yv++;
+            }
+
+            this.x += this.xv;
+            this.y += this.yv;
+
+            this.xv *= 0.8;
+            this.yv *= 0.8;
+
+            this.x = constrain(this.x, this.w / 2, width - this.w / 2);
+            this.y = constrain(this.y, this.h / 2, height - this.h / 2);
+        }
+    };
+        </code></pre>
+        <p>
+            Bing. Bang. Boom. There's our player object. Now, updating is as
+            simple as calling draw and move from a draw function with a
+            background.
+        </p>
+        <pre><code>
+    // -- snip --
+    draw = function() {
+        background(255, 255, 255);
+        player.draw();
+        player.move();
+    };
+        </code></pre>
+        <p>
+            That's it. Nope, not kidding. That's literally it. If you'd like to
+            take a look at and modify a working demo, head over
+            <a
+                href="https://www.khanacademy.org/computer-programming/move-a-box-round-the-screen-controlled-by-arrow-keys/5130588950675456"
+                target="_blank"
+                >here</a
+            >.
+        </p>
+        <p>
+            I truly hope this was helpful in some way. If you have questions,
+            always feel free to post them right down in the Questions area. See
+            you next Tuesday!
+        </p>
+
+        <p class="small">
+            Questions? Leave a comment! I'd love to hear opinions, criticism,
+            and queries.
+            <br /><br />
+            Consider
+            <a
+                href="https://www.khanacademy.org/computer-programming/-/5721957766316032"
+                target="_blank"
+                >subscribing</a
+            >
+            if you enjoyed! 🚀
+            <br />
+            Created with 💖 in 2023 by Dominic R.
+        </p>
+
+        <button id="top">
+            <i class="material-icons">&#xe316;</i>
+        </button>
+        <script src="src/index.js"></script>
+
+        <script type="thumbnail.js" name="thumbnail">
+            set(document.getElementsByName('ski')[0])
+            size(600, 600)
+                const img = loadImage('https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Wildflowers%2C_Phlox_paniculata_%28Eva_cullum%29%2C_flowers_in_spring%2C_flowers_in_summer.jpg/640px-Wildflowers%2C_Phlox_paniculata_%28Eva_cullum%29%2C_flowers_in_spring%2C_flowers_in_summer.jpg', 900, 600)
+
+                imageMode(0)
+                textAlign(1, 1)
+
+                function glowText(t, x, y) {
+                  fill(255, 255, 255, 30)
+                  text(t, x, y - 5)
+                  text(t, x, y + 5)
+                  text(t, x - 5, y)
+                  text(t, x + 5, y)
+                  fill(255, 255, 255)
+                  text(t, x, y)
+                }
+
+                draw = () => {
+                    clear()
+                    image(img, 0, 0)
+
+                    noStroke()
+                    textFont('Abril Fatface', 100)
+                    glowText('Top-Down\nMovement', width/2, 300)
+                }
+        </script>
+        <canvas style="display: none" name="ski"></canvas>
+        <script src="https://cdn.jsdelivr.net/gh/thelegendski/ski.js@1.6.1/main.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/thelegendski/thumbnail.js@1.0.0/main.js"></script>
+    </body>
+</html>

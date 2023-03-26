@@ -1,0 +1,70 @@
+h1,
+h2,
+h3 {
+    font-family: 'Abril Fatface';
+    font-weight: 400;
+}
+h2 {
+    font-weight: 400;
+}
+p,
+ul,
+ol {
+    font-family: 'Open Sans';
+    font-weight: 400;
+}
+code {
+    border-radius: 10px;
+    font-family: 'JetBrains Mono';
+    font-size: 12px;
+}
+a {
+    color: blue;
+    text-decoration: none;
+}
+
+body {
+    margin: 0;
+    padding: 50px;
+    line-height: 1.75;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgb(40, 40, 40);
+    border-radius: 4px;
+}
+
+.small {
+    font-size: 12px;
+}
+#top {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    margin: 10px;
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 10px;
+    transition: 0.2s;
+    background-color: white;
+}
+#top:hover {
+    transform: translate(0px, -6px);
+}
+
+.hero {
+    background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Wildflowers%2C_Phlox_paniculata_%28Eva_cullum%29%2C_flowers_in_spring%2C_flowers_in_summer.jpg/640px-Wildflowers%2C_Phlox_paniculata_%28Eva_cullum%29%2C_flowers_in_spring%2C_flowers_in_summer.jpg');
+    color: white;
+    text-align: center;
+    padding: 30px;
+    margin: 0px;
+    background-attachment: fixed;
+    background-position: center;
+    background-size: cover;
+    background-repeat: none;
+}
