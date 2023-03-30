@@ -1,3 +1,3 @@
-[Title]:
+[Title]: Top-Down Movement (PJS)
 [Description]: Describes how to create a controllable square in PJS. Areas covered include PJS basics, JavaScript objects, the PJS-flavor of input listeners, pseudocode, and top-down movement implementation.
 [URL]: https://www.khanacademy.org/computer-programming/top-down-movement-tt/6090508842876928
