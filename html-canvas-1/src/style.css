@@ -1,0 +1,78 @@
+#top {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    margin: 10px;
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 10px;
+    transition: 0.2s;
+    background-color: white;
+}
+#top:hover {
+    transform: translate(0px, -6px);
+}
+
+body {
+    margin: 0;
+}
+article {
+    padding: 40px;
+}
+
+h1,
+h2,
+h3 {
+    font-family: 'Ubuntu Mono';
+    font-weight: 700;
+}
+p,
+ul {
+    font-family: 'Roboto';
+}
+code {
+    font-family: 'Roboto Mono';
+}
+li a {
+    color: black;
+    text-decoration-style: dotted;
+}
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgb(40, 40, 40);
+    border-radius: 4px;
+}
+.copy {
+    display: flex;
+    align-items: center;
+    height: 20px;
+    font-family: 'Roboto', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif';
+    font-weight: 300;
+    padding: 10px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #00000055;
+    color: #ccc;
+    cursor: pointer;
+    font-size: 17px;
+    border-bottom-left-radius: 5px;
+    transition: color 250ms;
+}
+.copy .material-icons {
+    font-size: 16px;
+    margin-right: 2px;
+}
+.copy:hover {
+    color: #fff;
+}
+
+.hljs {
+    position: relative;
+    border-radius: 5px;
+    font-size: 14px;
+}

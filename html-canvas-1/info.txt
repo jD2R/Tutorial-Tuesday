@@ -1,0 +1,3 @@
+[Title]: HTML Canvas Tutorial (1)
+[Description]: A brief introduction to features and usage of the HTML5 canvas element. Includes three demos to show implementation of things like drawing, simple physics, and input.
+[URL]: https://www.khanacademy.org/computer-programming/html-canvas-tutorial/5966934052225024

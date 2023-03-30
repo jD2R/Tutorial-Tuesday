@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<!--
+    credit to ski (@thelegendski) for thumbnail.js
+    credit to polar (@notpolar) for code copying functionality and styling
+-->
+<html lang="en">
+    <head>
+        <title>HTML Canvas Tutorial</title>
+        <meta charset="UTF-8" />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/icon?family=Material+Icons"
+        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Roboto&family=Ubuntu+Mono&family=Roboto+Mono&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            id="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/atom-one-dark.min.css"
+        />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/highlight.min.js"></script>
+
+        <meta name="viewport" content="width=device-width" />
+        <link rel="stylesheet" href="src/style.css"/>
+    </head>
+    <body>
+        <!-- yucky markdown generated -->
+        <article>
+            <h1 id="introduction">Introduction</h1>
+            <p>
+                I had a request last week to make a tutorial on what you can do
+                with the HTML canvas element, so here&#39;s part 1. A lot of
+                people don&#39;t realize how many benefits there are to
+                switching environments, but I can guarantee you there are a ton
+                of benefits to using an HTML environment as opposed to a PJS
+                one.
+            </p>
+            <p>Let&#39;s jump right in.</p>
+            <h2 id="pjs-problems">PJS Problems</h2>
+            <p>
+                If we&#39;re going to start with the obvious, PJS is slow.
+                It&#39;s a huge library that&#39;s able to do too much - many of
+                the features available aren&#39;t discussed on KA. Why are they
+                there if we&#39;re not using them regularly? If you really like
+                how PJS works, consider switching to another similar library
+                like ski.js which only provides essential, well-used features
+                like drawing and input.
+            </p>
+            <p>
+                Apart from being slow, there are several functionalities that
+                are prohibited on KA for whatever reason that are useful and
+                would take your program to the next level. Fonts in PJS are
+                constrained to the ones that KA provides, which makes for a
+                whole bunch of games that all use Trebuchet MS Bold (sorry GW,
+                it&#39;s not <em>that</em> good-looking).
+            </p>
+            <p>
+                Another feature that&#39;s missing from KA&#39;s PJS is
+                <code>localStorage</code>. The ability to store data in the
+                browser of your user is immensely helpful for things like games
+                that can store things like a high score, a username, or even the
+                save code to your MineKhan world.
+            </p>
+            <p>
+                If we want to use things like this, we&#39;ve got to go to HTML.
+                And considering it&#39;s not that large of a leap, I&#39;m
+                somewhat confused as to why more people haven&#39;t made it.
+                Let&#39;s take a look at how we&#39;d go about setting a
+                workspace up, and then make a few demos to scratch the surface
+                of this mysterious terrain.
+            </p>
+            <h2 id="canvas-introduction">Canvas Introduction</h2>
+            <p>
+                A note - this tutorial is intended for you to follow along to.
+                I&#39;m following my own instructions as I write this so that
+                your experience is as smooth as possible, but if you need
+                something to be clarified don&#39;t hesitate to drop a comment
+                or a question below.
+            </p>
+            <h3 id="setup">Setup</h3>
+            <p>
+                Let&#39;s grab a new HTML project. If you&#39;re like me and you
+                need it to be 600 by 600, go ahead and save it then set the
+                height to 600 and reload the page. Much better!
+            </p>
+            <p>
+                Change the title to something nicer than &quot;new
+                webpage&quot;. I&#39;m calling mine
+                <strong>Canvas Workspace</strong>.
+            </p>
+            <p>
+                Fantastic! Let&#39;s see what we&#39;ve got so far (KA provides
+                us with a nice little template we can build off of).
+            </p>
+            <pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE html&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"utf-8"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>New webpage<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+
+
+    <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+            <p>
+                Let&#39;s add a canvas element with an id so we can grab it
+                later from inside the JavaScript.
+            </p>
+            <pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE html&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"utf-8"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>New webpage<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-name">canvas</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"canvas"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">canvas</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+            <p>
+                Nice! Let&#39;s quickly style the page, just some quick things
+                like getting rid of extra whitespace.
+            </p>
+            <pre><code class="lang-css"><span class="hljs-tag">&lt;<span class="hljs-name">style</span>&gt;</span><span class="css">
+    <span class="hljs-selector-tag">body</span> {
+        <span class="hljs-attribute">width</span>: <span class="hljs-number">100vw</span>;
+        <span class="hljs-attribute">height</span>: <span class="hljs-number">100vh</span>;
+        <span class="hljs-attribute">margin</span>: <span class="hljs-number">0</span>;
+        <span class="hljs-attribute">padding</span>: <span class="hljs-number">0</span>;
+        <span class="hljs-attribute">overflow</span>: hidden;
+    }
+    <span class="hljs-selector-id">#canvas</span> {
+        <span class="hljs-attribute">background-color</span>: red;
+    }
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">style</span>&gt;</span>
+</code></pre>
+            <p>
+                Thankfully, those colors are just so that you can see where the
+                canvas is in relation to the body. We&#39;ll be taking them out
+                in the final product. Let&#39;s head into some JS now to
+                actually something to draw on the canvas.
+            </p>
+            <p>Create a new script in the body underneath the canvas.</p>
+            <pre><code><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"module"</span>&gt;</span><span class="javascript">
+    <span class="hljs-keyword">const</span> canvas = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">"canvas"</span>);
+    <span class="hljs-keyword">const</span> ctx = canvas.getContext(<span class="hljs-string">'2d'</span>);
+
+    canvas.width = <span class="hljs-built_in">window</span>.innerWidth;
+    canvas.height = <span class="hljs-built_in">window</span>.innerHeight;
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre>
+            <p>
+                Allow me to explain. The first two lines grab the canvas (you
+                might be familiar with <code>getElementById()</code>) and get
+                the context. The context is what we&#39;ll use to draw shapes on
+                the canvas, so name it something simple because we&#39;re going
+                to be typing it a <em>lot</em>. The other two lines set the
+                canvas to fill the whole screen. If you&#39;d like to get rid of
+                the CSS color selector that makes the canvas red at this point,
+                you&#39;re welcome to.
+            </p>
+            <p>
+                Finally, the <code>type=&quot;module&quot;</code> allows me to
+                use ES6 syntax. That&#39;s great because it looks cool and has
+                great functionality to it. If you&#39;re unfamiliar with what
+                ES6 brings to the table, I&#39;d encourage you to go do some
+                research into some of the features.
+            </p>
+            <p>
+                Here&#39;s where we&#39;re at with the program currently, if
+                you&#39;re curious.
+            </p>
+            <pre><code><span class="hljs-meta">&lt;!DOCTYPE html&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"utf-8"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>New webpage<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-name">style</span>&gt;</span><span class="css">
+            <span class="hljs-selector-tag">body</span> {
+                <span class="hljs-attribute">width</span>: <span class="hljs-number">100vw</span>;
+                <span class="hljs-attribute">height</span>: <span class="hljs-number">100vh</span>;
+                <span class="hljs-attribute">margin</span>: <span class="hljs-number">0</span>;
+                <span class="hljs-attribute">padding</span>: <span class="hljs-number">0</span>;
+                <span class="hljs-attribute">overflow</span>: hidden;
+            }
+            <span class="hljs-selector-id">#canvas</span> {
+                <span class="hljs-attribute">background-color</span>: <span class="hljs-number">#f00000</span>;
+            }
+        </span><span class="hljs-tag">&lt;/<span class="hljs-name">style</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-name">canvas</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"canvas"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">canvas</span>&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"module"</span>&gt;</span><span class="javascript">
+            <span class="hljs-keyword">const</span> canvas = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">"canvas"</span>);
+            <span class="hljs-keyword">const</span> ctx = canvas.getContext(<span class="hljs-string">'2d'</span>);
+
+            canvas.width = <span class="hljs-built_in">window</span>.innerWidth;
+            canvas.height = <span class="hljs-built_in">window</span>.innerHeight;
+        </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+            <h3 id="drawing">Drawing</h3>
+            <p>
+                Let&#39;s draw one of the most simple shapes - the humble
+                rectangle. It&#39;s almost as easy to draw this in HTML as it is
+                in PJS!
+            </p>
+            <pre><code class="lang-js">const canvas = document.getElementById(<span class="hljs-string">"canvas"</span>);
+const ctx = canvas.getContext('<span class="hljs-number">2</span>d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+ctx.fillStyle = <span class="hljs-string">"black"</span>;
+ctx.fillRect(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">100</span>, <span class="hljs-number">100</span>);
+ctx.fillRect(<span class="hljs-number">300</span>, <span class="hljs-number">200</span>, <span class="hljs-number">150</span>, <span class="hljs-number">240</span>);
+</code></pre>
+            <p>
+                There&#39;s a few calls we need to make sense of here, but for
+                the most part the code is pretty self-explanatory.
+            </p>
+            <ul>
+                <li>
+                    <code>fillStyle</code> is basically PJS
+                    <code>fill</code> but with a string instead of three (or
+                    four) parameters. You might be distraught that this takes
+                    away the color picker, but you&#39;d be wrong. If you use
+                    <code>ctx.fillStyle = &quot;rgb(0, 0, 0)&quot;;</code>
+                    instead, the color picker remains when you click on the rgb
+                    values. It also takes hex codes, but that&#39;s kinda
+                    confusing unless you know what they are.
+                </li>
+                <li>
+                    <code>fillRect</code> is literally PJS <code>rect</code>.
+                    Same parameters, too. No corner rounding though.
+                </li>
+                <li>
+                    As an alternative, you could use <code>strokeRect</code>,
+                    which only draws the outline.
+                </li>
+            </ul>
+            <p>
+                One important thing that you need to keep in mind is that every
+                call to a drawing function needs to be preceded with the context
+                of the canvas. This is because they are all calls to the context
+                object, so we need to be sure to reference the context or else
+                it won&#39;t draw.
+            </p>
+            <p>Same code as before, we&#39;ve just updated the JavaScript.</p>
+            <pre><code><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"module"</span>&gt;</span><span class="javascript">
+    <span class="hljs-keyword">const</span> canvas = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">"canvas"</span>);
+    <span class="hljs-keyword">const</span> ctx = canvas.getContext(<span class="hljs-string">'2d'</span>);
+
+    canvas.width = <span class="hljs-built_in">window</span>.innerWidth;
+    canvas.height = <span class="hljs-built_in">window</span>.innerHeight;
+
+    ctx.fillStyle = <span class="hljs-string">"rgb(0, 0, 0)"</span>;
+    ctx.fillRect(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">100</span>, <span class="hljs-number">100</span>);
+    ctx.fillRect(<span class="hljs-number">300</span>, <span class="hljs-number">200</span>, <span class="hljs-number">150</span>, <span class="hljs-number">240</span>)
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre>
+            <p>
+                That about sums up how to set up a canvas project. Let&#39;s
+                look at some demos now, to see more things you can do with
+                canvas.
+            </p>
+            <h2 id="demos">Demos</h2>
+            <p>
+                I&#39;ve created three demos for you. There are no previews
+                in-page, but I&#39;ve linked them to KA projects that
+                demonstrate the concept.
+            </p>
+            <ul>
+                <li>
+                    <a
+                        href="https://www.khanacademy.org/computer-programming/moving-box/5726372640374784"
+                        target="_blank"
+                        >Moving Box</a
+                    >
+                </li>
+                <li>
+                    <a
+                        href="https://www.khanacademy.org/computer-programming/bouncing-balls/6148132825251840"
+                        target="_blank"
+                        >Bouncing Balls</a
+                    >
+                </li>
+                <li>
+                    <a
+                        href="https://www.khanacademy.org/computer-programming/top-down-movement/6525578166714368"
+                        target="_blank"
+                        >Top-Down Movement</a
+                    >
+                </li>
+            </ul>
+            <h3 id="moving-box">Moving Box</h3>
+            <p>
+                This demo introduces you to the concept of animation. This is
+                accomplished by the use of <code>requestAnimationFrame()</code>.
+                Let&#39;s take a look at the demo and then I&#39;ll explain.
+            </p>
+            <p>Here&#39;s the JS code.</p>
+            <pre><code class="lang-js"><span class="hljs-comment">/* setup code */</span>
+<span class="hljs-keyword">const</span> canvas = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">"canvas"</span>);
+<span class="hljs-keyword">const</span> ctx = canvas.getContext(<span class="hljs-string">'2d'</span>);
+
+canvas.width = <span class="hljs-built_in">window</span>.innerWidth;
+canvas.height = <span class="hljs-built_in">window</span>.innerHeight;
+
+<span class="hljs-comment">/* animation code */</span>
+<span class="hljs-keyword">let</span> x = <span class="hljs-number">0</span>;
+ctx.fillStyle = <span class="hljs-string">"black"</span>;
+<span class="hljs-keyword">const</span> draw = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    requestAnimationFrame(draw);
+
+    ctx.clearRect(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-built_in">window</span>.innerWidth, <span class="hljs-built_in">window</span>.innerHeight);
+    x++;
+
+    ctx.fillRect(x, <span class="hljs-number">0</span>, <span class="hljs-number">100</span>, <span class="hljs-number">100</span>);
+}
+draw();
+</code></pre>
+            <p>
+                The logic should make sense to anyone who does simple
+                programming in PJS. Now, to the animation explanation.
+            </p>
+            <p>
+                We make a function, called draw. In PJS you can only use
+                <code>draw</code>, but here you can name the function anything.
+                The important thing is that first line in the function - the
+                <code>requestAnimationFrame</code>. It basically asks to run the
+                function again, so by calling the function infinitely you can
+                create a draw loop. Yes, this method is more reliable than using
+                <code>setInterval</code>.
+            </p>
+            <p>
+                Now we can use this knowledge to create more complex looping
+                animations.
+            </p>
+            <p>
+                Quick note: if you can&#39;t reload the program, add a blank
+                <code>&lt;script&gt;&lt;/script&gt;</code> right before the end
+                of the body. This makes the reload button pop up next to the
+                Spin-off button.
+            </p>
+            <h3 id="bouncing-ball">Bouncing Ball</h3>
+            <p>
+                I decided to make this complex animation for you guys. It&#39;s
+                more complicated than the other demos because it uses more
+                advanced concepts like OOP, so if you don&#39;t understand
+                something just find something you do and play around with it.
+            </p>
+            <p>Here&#39;s the code.</p>
+            <pre><code class="lang-js"><span class="hljs-comment">// setup code</span>
+<span class="hljs-keyword">const</span> canvas = document.getElementById(<span class="hljs-string">"canvas"</span>);
+<span class="hljs-keyword">const</span> ctx = canvas.getContext(<span class="hljs-string">'2d'</span>);
+
+canvas.<span class="hljs-built_in">width</span> = window.innerWidth;
+canvas.<span class="hljs-built_in">height</span> = window.innerHeight;
+
+<span class="hljs-keyword">const</span> <span class="hljs-built_in">width</span> = canvas.<span class="hljs-built_in">width</span>;
+<span class="hljs-keyword">const</span> <span class="hljs-built_in">height</span> = canvas.<span class="hljs-built_in">height</span>;
+
+class Ball {
+    constructor(x, y, xv, yv, radius) {
+        <span class="hljs-keyword">this</span>.x = x;
+        <span class="hljs-keyword">this</span>.y = y;
+        <span class="hljs-keyword">this</span>.xv = xv;
+        <span class="hljs-keyword">this</span>.yv = yv;
+        <span class="hljs-keyword">this</span>.radius = radius;
+    }
+    <span class="hljs-title">draw</span>() {
+        ctx.beginPath();
+        ctx.<span class="hljs-built_in">arc</span>(<span class="hljs-keyword">this</span>.x, <span class="hljs-keyword">this</span>.y, <span class="hljs-keyword">this</span>.radius, <span class="hljs-number">0</span>, Math.<span class="hljs-literal">PI</span> * <span class="hljs-number">2</span>);
+        ctx.<span class="hljs-built_in">fill</span>();
+    }
+    move() {
+        <span class="hljs-keyword">this</span>.x += <span class="hljs-keyword">this</span>.xv;
+        <span class="hljs-keyword">this</span>.y += <span class="hljs-keyword">this</span>.yv;
+
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.x &lt; <span class="hljs-keyword">this</span>.radius || <span class="hljs-keyword">this</span>.x &gt; <span class="hljs-built_in">width</span> - <span class="hljs-keyword">this</span>.radius) {
+            <span class="hljs-keyword">this</span>.xv = -<span class="hljs-keyword">this</span>.xv;
+        }
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.y &lt; <span class="hljs-keyword">this</span>.radius || <span class="hljs-keyword">this</span>.y &gt; <span class="hljs-built_in">height</span> - <span class="hljs-keyword">this</span>.radius) {
+            <span class="hljs-keyword">this</span>.yv = -<span class="hljs-keyword">this</span>.yv;
+        }
+    }
+}
+
+<span class="hljs-keyword">const</span> b = <span class="hljs-keyword">new</span> Ball(<span class="hljs-built_in">width</span>/<span class="hljs-number">2</span>, <span class="hljs-built_in">height</span>/<span class="hljs-number">2</span>, Math.<span class="hljs-built_in">random</span>() * <span class="hljs-number">10</span>, Math.<span class="hljs-built_in">random</span>() * <span class="hljs-number">10</span>, <span class="hljs-number">20</span>);
+<span class="hljs-keyword">const</span> b1 = <span class="hljs-keyword">new</span> Ball(<span class="hljs-built_in">width</span>/<span class="hljs-number">2</span>, <span class="hljs-built_in">height</span>/<span class="hljs-number">2</span>, Math.<span class="hljs-built_in">random</span>() * <span class="hljs-number">10</span>, Math.<span class="hljs-built_in">random</span>() * <span class="hljs-number">10</span>, <span class="hljs-number">30</span>);
+
+<span class="hljs-keyword">const</span> <span class="hljs-title">draw</span> = () =&gt; {
+    requestAnimationFrame(<span class="hljs-title">draw</span>);
+    ctx.clearRect(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-built_in">width</span>, <span class="hljs-built_in">height</span>);
+
+    b.<span class="hljs-title">draw</span>();
+    b.move();
+
+    b1.<span class="hljs-title">draw</span>();
+    b1.move();
+}
+<span class="hljs-title">draw</span>();
+</code></pre>
+            <p>
+                If it&#39;s being slow for you (it was kinda laggy for a bit on
+                my end), add this code.
+            </p>
+            <pre><code class="lang-js"><span class="hljs-keyword">for</span> (let <span class="hljs-built_in">i</span> = requestAnimationFrame(Math.<span class="hljs-built_in">cos</span>);<span class="hljs-built_in">i</span> &gt; <span class="hljs-number">0</span>; cancelAnimationFrame(<span class="hljs-built_in">i</span>--)){};
+</code></pre>
+            <p>
+                All credit to HSstudent16, this makes sure it runs at a constant
+                frame rate. If it works for you, great!
+            </p>
+            <h3 id="top-down-movement">Top-Down Movement</h3>
+            <p>
+                In this last demo, I&#39;m going to recreate the last tutorial
+                in HTML. And honestly, it&#39;s not that hard. The trick is
+                knowing about how to set up event listeners, which is a bit
+                trickier than what we had to do in PJS.
+            </p>
+            <p>Here&#39;s the code.</p>
+            <pre><code class="lang-js"><span class="hljs-keyword">for</span> (let i = requestAnimationFrame(Math.cos);i &gt; <span class="hljs-number">0</span>; cancelAnimationFrame(i--)){}
+
+const canvas = document.getElementById(<span class="hljs-string">"canvas"</span>);
+const ctx = canvas.getContext(<span class="hljs-string">'2d'</span>);
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const width = canvas.width;
+const height = canvas.height;
+
+let keys = {};
+window.addEventListener(<span class="hljs-string">'keydown'</span>, (e) =&gt; {
+    e.preventDefault();
+    keys[e.code] = <span class="hljs-literal">true</span>;
+});
+window.addEventListener(<span class="hljs-string">'keyup'</span>, (e) =&gt; {
+    e.preventDefault();
+    keys[e.code] = <span class="hljs-literal">false</span>;
+});
+
+const player = {
+    x: width / <span class="hljs-number">2</span>,
+    y: height / <span class="hljs-number">2</span>,
+    w: <span class="hljs-number">40</span>,
+    h: <span class="hljs-number">40</span>,
+    xv: <span class="hljs-number">0</span>,
+    yv: <span class="hljs-number">0</span>,
+
+    draw: function() {
+        ctx.fillStyle = <span class="hljs-string">"black"</span>;
+        ctx.fillRect(<span class="hljs-keyword">this</span>.x, <span class="hljs-keyword">this</span>.y, <span class="hljs-keyword">this</span>.w, <span class="hljs-keyword">this</span>.h);
+    },
+    move: function() {
+        <span class="hljs-keyword">if</span> (keys[<span class="hljs-string">'ArrowUp'</span>]) {
+            <span class="hljs-keyword">this</span>.yv--;
+        }
+        <span class="hljs-keyword">if</span> (keys[<span class="hljs-string">'ArrowDown'</span>]) {
+            <span class="hljs-keyword">this</span>.yv++;
+        }
+        <span class="hljs-keyword">if</span> (keys[<span class="hljs-string">'ArrowLeft'</span>]) {
+            <span class="hljs-keyword">this</span>.xv--;
+        }
+        <span class="hljs-keyword">if</span> (keys[<span class="hljs-string">'ArrowRight'</span>]) {
+            <span class="hljs-keyword">this</span>.xv++;
+        }
+
+        <span class="hljs-keyword">this</span>.x += <span class="hljs-keyword">this</span>.xv;
+        <span class="hljs-keyword">this</span>.y += <span class="hljs-keyword">this</span>.yv;
+
+        <span class="hljs-keyword">this</span>.xv *= <span class="hljs-number">0.8</span>;
+        <span class="hljs-keyword">this</span>.yv *= <span class="hljs-number">0.8</span>;
+
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.x &lt; <span class="hljs-number">0</span>) {
+            <span class="hljs-keyword">this</span>.x = <span class="hljs-number">0</span>;
+        }
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.x &gt; width - <span class="hljs-keyword">this</span>.w) {
+            <span class="hljs-keyword">this</span>.x = width - <span class="hljs-keyword">this</span>.w;
+        }
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.y &lt; <span class="hljs-number">0</span>) {
+            <span class="hljs-keyword">this</span>.y = <span class="hljs-number">0</span>;
+        }
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.y &gt; height - <span class="hljs-keyword">this</span>.h) {
+            <span class="hljs-keyword">this</span>.y = height - <span class="hljs-keyword">this</span>.h;
+        }
+    },
+    update: function() {
+        <span class="hljs-keyword">this</span>.draw();
+        <span class="hljs-keyword">this</span>.move();
+    }
+}
+
+const draw = () =&gt; {
+    requestAnimationFrame(draw);
+    ctx.clearRect(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, width, height);
+
+    player.update();
+
+}
+draw();
+</code></pre>
+            <p>
+                As you can see, it&#39;s doing the same thing as last week&#39;s
+                tutorial did, but in HTML. Let&#39;s look at those event
+                listeners for a second before we conclude.
+            </p>
+            <pre><code class="lang-js">let keys = {};
+<span class="hljs-built_in">window</span>.addEventListener(<span class="hljs-string">'keydown'</span>, <span class="hljs-function"><span class="hljs-params">(e)</span> =&gt;</span> {
+    e.preventDefault();
+    keys[e.code] = <span class="hljs-literal">true</span>;
+});
+<span class="hljs-built_in">window</span>.addEventListener(<span class="hljs-string">'keyup'</span>, <span class="hljs-function"><span class="hljs-params">(e)</span> =&gt;</span> {
+    e.preventDefault();
+    keys[e.code] = <span class="hljs-literal">false</span>;
+});
+</code></pre>
+            <p>
+                The <code>addEventListener</code> adds an &quot;event
+                listener&quot; that listens for something to happen - in this
+                case when a key is pressed or released. What we do next is
+                prevent the default action from taking place - this is because
+                normally pressing the arrow keys would scroll the page up and
+                down, so to prevent that from messing with our game we need to
+                disable it. From there, it&#39;s as simple as just adding the
+                <code>keys</code> variables for easy access.
+            </p>
+            <h2 id="conclusion">Conclusion</h2>
+            <p>
+                I hope this has taught you something, I know I&#39;ve definitely
+                learned something in the process of making this. What would you
+                like to learn about canvas next?
+            </p>
+            <p>Happy coding!</p>
+        </article>
+
+        <!-- scroll to top button -->
+        <button id="top">
+            <i class="material-icons">&#xe316;</i>
+        </button>
+
+        <!-- import the scripts -->
+        <script src="src/index.js"></script>
+
+        <script type="thumbnail.js" name="thumbnail">
+            set(document.getElementsByName('ski')[0])
+            size(600, 600)
+                const img = loadImage('https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Brochas%2C_Pinturas_y_Godete.jpg/576px-Brochas%2C_Pinturas_y_Godete.jpg', 600, 792)
+
+                imageMode(0)
+                textAlign(1, 1)
+
+                function glowText(t, x, y) {
+                  fill(0, 0, 0, 30)
+                  text(t, x, y - 5)
+                  text(t, x, y + 5)
+                  text(t, x - 5, y)
+                  text(t, x + 5, y)
+                  fill(255, 255, 255)
+                  text(t, x, y)
+                }
+
+                draw = () => {
+                    clear()
+                    image(img, 0, 0)
+
+                    noStroke()
+                    textFont('Ubuntu Mono', 80)
+                    glowText('HTML Canvas\nTutorial', width/2, 300)
+                }
+        </script>
+        <canvas style="display: none" name="ski"></canvas>
+        <script src="https://cdn.jsdelivr.net/gh/thelegendski/ski.js@1.6.1/main.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/thelegendski/thumbnail.js@1.0.0/main.js"></script>
+    </body>
+</html>
