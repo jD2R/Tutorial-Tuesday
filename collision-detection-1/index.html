@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<!--
+    credit to ski (@thelegendski) for thumbnail.js
+    credit to polar (@notpolar) for code copying functionality and styling
+-->
+<html lang="en">
+    <head>
+        <title>Collision Detection</title>
+        <meta charset="UTF-8" />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/icon?family=Material+Icons"
+        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Roboto&family=Ubuntu+Mono&family=Roboto+Mono&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            id="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/atom-one-dark.min.css"
+        />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/highlight.min.js"></script>
+
+        <meta name="viewport" content="width=device-width" />
+        <link rel="stylesheet" href="src/style.css" />
+    </head>
+    <body>
+        <!-- yucky markdown generated -->
+        <article>
+        <h1 id="basic-collision-detection">Basic Collision Detection</h1>
+        <p>Welcome back to this edition of Tutorial Tuesday! This guide is fresh off the press and I&#39;m super excited to share some tips central to the game development world.</p>
+        <p>You may notice that throughout this tutorial I&#39;ll be using pure canvas instead of a library like PJS or ski.js. This is part of my push for people to move to canvas, which is something that I hope you&#39;ll consider if you haven&#39;t already made the switch. If you&#39;re not familiar with canvas, you might find it beneficial to head over to my <a href="https://www.khanacademy.org/computer-programming/html-canvas-tutorial/5966934052225024" target="_blank">HTML Canvas Tutorial</a>.</p>
+        <p>With that in mind, let&#39;s jump right in!</p>
+        <h2 id="collision-detection-">Collision Detection?</h2>
+        <p>What&#39;s collision detection as opposed to actual collisions? Good question!</p>
+        <p>Coding actual collisions would mean actually telling the program what to do when the objects in question collide. That&#39;s pretty complicated, and on top of that it&#39;s largely dependent on the type of game you&#39;re making.</p>
+        <p>And let&#39;s take a step back - all of that depends on knowing <strong>when the objects collide</strong>. That&#39;s what collision <em>detection</em> is: it detects a collision between two or more objects so that further action can be taken. Over the course of this guide, we&#39;ll be taking a look at three basic shapes that I&#39;m sure you&#39;re familiar with - the point, the circle, and the rectangle.</p>
+        <h2 id="what-s-in-a-shape-">What&#39;s in a shape?</h2>
+        <p>I am of the opinion that every shape (or object shaped like a particular shape) in a game has a set of distinct properties that makes it <em>that shape</em>. Let&#39;s look at a point for example.</p>
+        <p>A point has x and y values. That&#39;s what it is, a <em>point</em> on the canvas - a set of specific paired coordinates in the (x, y) format. So let&#39;s take a look at what a point would look like represented as a JavaScript object.</p>
+        <pre><code class="lang-js">const point1 = {
+<span class="hljs-symbol">    x:</span> <span class="hljs-number">0</span>,
+<span class="hljs-symbol">    y:</span> <span class="hljs-number">0</span>
+};</code></pre>
+        <p>There it is! The keys are just x and y - when we talk about points, this is the kind of object we&#39;re expecting.</p>
+        <p>Circles? They also have an x and a y, but they have an additional key that controls the radius (or the distance from the center to an edge). Because if you think about it, a circle is just a fat dot. Having the extra radius key gives us the information about how thick the circle is.</p>
+        <p>What about ellipses? They&#39;re super complicated, and way beyond the scope of this tutorial. If you&#39;re interested, there&#39;s information online about ellipse detection.</p>
+        <p>How about the diameter? Why don&#39;t we keep an extra key for that? Simply because it&#39;s not necessary. Whenever we need the diameter, like when we&#39;re drawing a circle in PJS (the width and height are measured as the diameter), we can just take the radius and multiply it by 2. There&#39;s no reason that we should keep a key that has no real value to us in our detection functions. Finding that you&#39;re using the measurement of the diameter of your circle often? Make a key. It&#39;s all about use cases - in this project, I don&#39;t need it.</p>
+        <p>Let&#39;s look at an expected JS-represented circle object, then.</p>
+        <pre><code class="lang-js">const circle1 = {
+<span class="hljs-symbol">    x:</span> <span class="hljs-number">0</span>,
+<span class="hljs-symbol">    y:</span> <span class="hljs-number">0</span>,
+<span class="hljs-symbol">    radius:</span> <span class="hljs-number">20</span>
+};</code></pre>
+        <p>Why am I using <code>radius</code> as the key? I find it&#39;s more descriptive than just writing <code>r</code> or something - mainly because when we get into rotation, some people use <code>r</code> or <code>rot</code> to represent the angle that the player is turned. If you know me, you&#39;ll know that when talking about the angle, I&#39;ll generally use <code>angle</code> instead of one of these variations, but that&#39;s beyond the point. Find the style that works for you - but be descriptive. Good code is worth trading a lot for, especially in smaller programs like the ones people are making here on KA.</p>
+        <p>Last one - rectangles. In PJS, rectangles are measured from the top left corner with an x and a y value, along with a width and a height. I like this method, it&#39;s a decent way of representing what a rectangle is with a JS object.</p>
+        <pre><code class="lang-js">const rect1 = {
+<span class="hljs-symbol">    x:</span> <span class="hljs-number">0</span>,
+<span class="hljs-symbol">    y:</span> <span class="hljs-number">0</span>,
+<span class="hljs-symbol">    w:</span> <span class="hljs-number">20</span>,
+<span class="hljs-symbol">    h:</span> <span class="hljs-number">20</span>
+};</code></pre>
+        <p>Notice I&#39;m using <code>w</code> and <code>h</code> instead of <code>width</code> and <code>height</code>. This is mainly because this method is pretty universal. There&#39;s not much else that w and h could represent in regards to this kind of shape; it follows pretty logically.</p>
+        <p>Why did we have to look at the expected format? It&#39;s a large part in detection if you want to write clean and simple code that doesn&#39;t repeat itself.</p>
+        <h2 id="actual-detection-finally-">Actual detection, finally.</h2>
+        <p>In the following six examples, I&#39;ll be explaining how to write collision detection methods in JavaScript with points, circles, and rectangles. They&#39;ll be written in ES6, so code that works in the webpage environment. If you want PJS code, try to discern what it would look like - here&#39;s a hint: they won&#39;t look that different. The main difference between the two is the arrow function syntax that ES6 provides. Just remember the conversion.</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> function1 = <span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> {
+}
+
+<span class="hljs-comment">// is the same as</span>
+
+<span class="hljs-keyword">var</span> function1 = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">e</span>) </span>{
+};
+
+<span class="hljs-comment">// or</span>
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">function1</span>(<span class="hljs-params">e</span>) </span>{
+}</code></pre>
+        <p>I don&#39;t believe that I can claim ownership of these  functions, because most of them are super simple. Just know that as with most things in the programming world, these functions are built on the foundation that others have laid - even if others have not specifically making a function.</p>
+        <p>Therefore, these are all free for you to use with no credit required. One day when you know everything you can look back and maybe realize like I have that absolutely everything you know isn&#39;t a product of your own ingenuity, rather, it&#39;s been a huge group effort. What can you contribute to the world with your code?</p>
+        <h3 id="point-to-point">Point to Point</h3>
+        <p>This is the simplest detection function that you&#39;ll ever make, I promise. All we&#39;re trying to check is if the one point is touching the other - <em>if the one point&#39;s coordinates at the same as the other&#39;s</em>. Wow.</p>
+<pre><code class="lang-js">const pointPoint = (p1, p2) =&gt; {
+    <span class="hljs-built_in"> return </span>p1.x === p2.x &amp;&amp; p1.y === p2.y;
+};</code></pre>
+        <p>Ok, fine. There are other ways to do it. You could stringify the objects and compare them, pretty sure you could use destructuring, etc. The important thing is that you check that the x and y values match from the points.</p>
+        <h3 id="point-to-circle">Point to Circle</h3>
+        <p>This one is pretty simple using the distance function. If you&#39;re not familiar with it, it&#39;s just a way to find the distance in units (pixels in our case) between two points. We can find the distance between the point and the center of the circle, and then check that that distance is less than the radius of the circle. If so, we&#39;ve made a proper collision.</p>
+<pre><code class="lang-js">const pointCirc = (p, <span class="hljs-built_in">c</span>) =&gt; {
+    <span class="hljs-keyword">return</span> dist(p.x, p.y, <span class="hljs-built_in">c</span>.x, <span class="hljs-built_in">c</span>.y) &lt; <span class="hljs-built_in">c</span>.radius;
+};</code></pre>
+        <p>Wait, but I said we were working with canvas. JS doesn&#39;t provide a distance function built-in; it&#39;s just another luxury we have to make from scratch. I&#39;ll utilize a helpful trick in the PJS environment to determine the code they&#39;ve used to code the distance function.</p>
+        <pre><code class="lang-js">println(<span class="hljs-name">dist</span>)<span class="hljs-comment">;</span></code></pre>
+        <p>This returns the following.</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> dx, dy, dz;
+    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">arguments</span>.length === <span class="hljs-number">4</span>) {
+        dx = <span class="hljs-built_in">arguments</span>[<span class="hljs-number">0</span>] - <span class="hljs-built_in">arguments</span>[<span class="hljs-number">2</span>];
+        dy = <span class="hljs-built_in">arguments</span>[<span class="hljs-number">1</span>] - <span class="hljs-built_in">arguments</span>[<span class="hljs-number">3</span>];
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">Math</span>.sqrt(dx * dx + dy * dy);
+    }
+    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">arguments</span>.length === <span class="hljs-number">6</span>) {
+        dx = <span class="hljs-built_in">arguments</span>[<span class="hljs-number">0</span>] - <span class="hljs-built_in">arguments</span>[<span class="hljs-number">3</span>];
+        dy = <span class="hljs-built_in">arguments</span>[<span class="hljs-number">1</span>] - <span class="hljs-built_in">arguments</span>[<span class="hljs-number">4</span>];
+        dz = <span class="hljs-built_in">arguments</span>[<span class="hljs-number">2</span>] - <span class="hljs-built_in">arguments</span>[<span class="hljs-number">5</span>];
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">Math</span>.sqrt(dx * dx + dy * dy + dz * dz);
+    }
+}</code></pre>
+        <p>See what I&#39;m always saying about PJS providing more than what we&#39;re using it for? This is a huge function that does too much, so obviously we&#39;re not going to be replicating everything inside of it. However, those top lines that are in the conditional that checks for a length of 4 are what is useful to us. That&#39;s the formula for distance on a 2D plane, as opposed to the conditional below that which checks for distance on a 3D plane. Here&#39;s the updated distance function that we&#39;ll be using - this is a helpful function to keep around in your programs as a utility.</p>
+        <p>Notice that this isn&#39;t the exact code that was in the PJS function. I&#39;ve taken guidance from the <em>original</em> distance formula and replicated that here instead. The only difference is that PJS listed the formula as having <code>x1 - x2</code> and <code>y1 - y2</code> instead of the below operations instead. Both produce the <strong>same result</strong>, so don&#39;t be busting on either method.</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> dist = <span class="hljs-function">(<span class="hljs-params">x1, y1, x2, y2</span>) =&gt;</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Math</span>.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+};</code></pre>
+        <p>Using this formula, we can now simply use that in our original function instead of PJS&#39;s <code>dist</code>. We&#39;re free of outside influence now, this is a valid detection algorithm.</p>
+        <h3 id="point-to-rect">Point to Rect</h3>
+        <p>Point to rectangle. This is pretty simple when you take note of some properties of rectangles - especially how they are utilized in canvas.</p>
+        <p>Remember that each rectangle has x, y, w, and h properties. To check the collision, we&#39;ll check if the point is inside these bounds. There are a bunch of ways to check this, but I&#39;ll go with a way that&#39;s tried and true.</p>
+<pre><code class="lang-js">const pointRect = <span class="hljs-function"><span class="hljs-params">(p, r)</span> =&gt;</span> {
+    <span class="hljs-keyword">return</span> p.x &gt; r.x &amp;&amp;
+            p.x &lt; r.x + r.w &amp;&amp;
+            p.y &gt; r.y &amp;&amp;
+            p.y &lt; r.y + r.h;
+};</code></pre>
+        <p>This just checks if the point matches the following criteria.</p>
+        <ol>
+        <li>If the point is farther left than the left side of the rectangle.</li>
+        <li>If the point is farther right than the right side of the rectangle.</li>
+        <li>If the point is farther down than the top side of the rectangle.</li>
+        <li>If the point is farther up than the bottom side of the rectangle.</li>
+        </ol>
+        <p>If it does, we&#39;re inside the rectangle and a collision is occurring. If we&#39;re not, then there&#39;s no collision.</p>
+        <p>If you haven&#39;t caught on by now, notice that we&#39;re using objects as parameters to our functions. These objects must have the same properties as the basic objects we talked about at the beginning. If they don&#39;t, it won&#39;t work - because it&#39;ll be accessing properties that don&#39;t exist. Be mindful of this if this is the way you choose to write your functions.</p>
+        <h3 id="circle-to-circle">Circle to Circle</h3>
+        <p>Points were easy, now we&#39;re advancing into the harder three algorithms. We&#39;ll start with circle to circle, because it&#39;s kind of like colliding two big points.</p>
+        <p>If you recall, when we made the algorithm for circle-point we checked for distance and checked against the radius of the circle. This process is similar, with the one key difference of checking a combined radius instead of just the one. Take a look at the function.</p>
+<pre><code class="lang-js"><span class="hljs-symbol">const</span> circCirc = (<span class="hljs-built_in">c1</span>, <span class="hljs-built_in">c2</span>) =&gt; {
+    return dist(<span class="hljs-built_in">c1</span>.x, <span class="hljs-built_in">c1</span>.y, <span class="hljs-built_in">c2</span>.x, <span class="hljs-built_in">c2</span>.y) &lt; <span class="hljs-built_in">c1</span>.radius + <span class="hljs-built_in">c2</span>.radius<span class="hljs-comment">;</span>
+}<span class="hljs-comment">;</span></code></pre>
+        <p>That&#39;s all there is to it. We&#39;re simply combining the radiuses and <em>then</em> checking instead of assuming that the second circle is just a point.</p>
+        <h3 id="circle-to-rect">Circle to Rect</h3>
+        <p>We&#39;re going to recreate another PJS function for this one. It&#39;s called <code>constrain</code>: you might have heard me talk about it before; all it does it take a particular value and then clamp it between two values. Here&#39;s the PJS way.</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> <span class="hljs-built_in">constrain</span> = (v, <span class="hljs-built_in">min</span>, <span class="hljs-built_in">max</span>) =&gt; {
+    <span class="hljs-built_in">return</span> v &gt; <span class="hljs-built_in">max</span> ? <span class="hljs-built_in">max</span> : v &lt; <span class="hljs-built_in">min</span> ? <span class="hljs-built_in">min</span> : v;
+};</code></pre>
+        <p>If you don&#39;t understand, you might not know about <strong>ternary operators</strong>. It&#39;s basically a condensed if-else statement. If we expanded everything in this function, the logic would look like this.</p>
+<pre><code class="lang-js"><span class="hljs-built_in">if</span> (v &gt; <span class="hljs-built_in">max</span>) {
+    <span class="hljs-built_in">return</span> <span class="hljs-built_in">max</span>;
+} <span class="hljs-built_in">else</span> <span class="hljs-built_in">if</span> (v &lt; <span class="hljs-built_in">min</span>) {
+    <span class="hljs-built_in">return</span> <span class="hljs-built_in">min</span>;
+} <span class="hljs-built_in">else</span> {
+    <span class="hljs-built_in">return</span> v;
+}</code></pre>
+        <p>Pretty simple, right? Here&#39;s the exact conversion for a ternary operator if you&#39;re ever interested in using one to spice up your program.</p>
+<pre><code class="lang-js"><span class="hljs-built_in">if</span> (a === <span class="hljs-number">1</span>) {
+    <span class="hljs-built_in">println</span>(<span class="hljs-string">"A is 1!"</span>);
+} <span class="hljs-built_in">else</span> {
+    <span class="hljs-built_in">println</span>(<span class="hljs-string">"A isn't 1 :("</span>);
+}
+
+a === <span class="hljs-number">1</span> ? <span class="hljs-built_in">println</span>(<span class="hljs-string">"A is 1!"</span>) : <span class="hljs-built_in">println</span>(<span class="hljs-string">"A isn't 1 :("</span>);
+<span class="hljs-comment">// or</span>
+<span class="hljs-built_in">println</span>(a === <span class="hljs-number">1</span> ? <span class="hljs-string">"A is 1!"</span> : <span class="hljs-string">"A isn't 1 :("</span>);</code></pre>
+        <p>Many times the second option will work in places like PJS whereas the first one might not. Keep ternary operators in mind when developing your next project, they&#39;re much shorter and more concise than the if-else statement is.</p>
+        <p>Now that we&#39;ve created our cloned function, let&#39;s get started on our detection algorithm.</p>
+        <p>The basic idea behind the process is the constraining of a value within the rectangle. We&#39;re going to basically take the circle&#39;s position and keep it inside the rectangle via the use of <code>constrain</code>. Then, we&#39;ll check to see if the distance between this point and the center of the circle is less than the radius of the circle - if it is, there&#39;s a collision going on.</p>
+<pre><code class="lang-js">const circRect = (<span class="hljs-built_in">c</span>, r) =&gt; {
+    <span class="hljs-keyword">let</span> cx = constrain(<span class="hljs-built_in">c</span>.x, r.x, r.x + r.w);
+    <span class="hljs-keyword">let</span> cy = constrain(<span class="hljs-built_in">c</span>.y, r.y, r.y + r.h);
+
+    <span class="hljs-keyword">return</span> dist(<span class="hljs-built_in">c</span>.x, <span class="hljs-built_in">c</span>.y, cx, cy) &lt; <span class="hljs-built_in">c</span>.radius;
+};</code></pre>
+        <p>Note that we&#39;re using both our <code>constrain</code> and our <code>dist</code> functions. Note how we first create the x and y that are constrained inside of the rectangle, and then check the distance from the radius in order to determine a collision.</p>
+        <h3 id="rect-to-rect">Rect to Rect</h3>
+        <p>Now to the last type of collision - rectangle to rectangle. Surprisingly, this is the type that most people hear about because it&#39;s an integral part of any rectangle-based platformer. The idea is to check for any overlap between the two shapes.</p>
+        <p>Let&#39;s take a look at the finished function and dissect from there.</p>
+<pre><code class="lang-js"><span class="hljs-symbol">const</span> rectRect = (<span class="hljs-built_in">r1</span>, <span class="hljs-built_in">r2</span>) =&gt; {
+    return <span class="hljs-built_in">r1</span>.x + <span class="hljs-built_in">r1</span>.w &gt; <span class="hljs-built_in">r2</span>.x &amp;&amp;
+            <span class="hljs-built_in">r1</span>.x &lt; <span class="hljs-built_in">r2</span>.x + <span class="hljs-built_in">r2</span>.w &amp;&amp;
+            <span class="hljs-built_in">r1</span>.y + <span class="hljs-built_in">r1</span>.h &gt; <span class="hljs-built_in">r2</span>.y &amp;&amp;
+            <span class="hljs-built_in">r1</span>.y &lt; <span class="hljs-built_in">r2</span>.y + <span class="hljs-built_in">r2</span>.h<span class="hljs-comment">;</span>
+}<span class="hljs-comment">;</span></code></pre>
+        <p>We check that four conditions are true.</p>
+        <ol>
+        <li>The rectangle isn&#39;t too far to the left of the other rectangle.</li>
+        <li>The rectangle isn&#39;t too far to the right of the other rectangle.</li>
+        <li>The rectangle isn&#39;t too far from the top of the other rectangle.</li>
+        <li>The rectangle isn&#39;t too far from the bottom of the other rectangle.</li>
+        </ol>
+        <p>This isn&#39;t super different from point-rect collisions, in that we use the width and the height of the rectangle added to the coordinates to determine whether a collision is occurring.</p>
+        <h2 id="conclusion">Conclusion</h2>
+        <p>That&#39;s collisions with those three shapes. Want examples? I&#39;ve created working demos of all six types <a href="https://www.khanacademy.org/computer-programming/collision-examples/6148740231774208" target="_blank">here</a>.</p>
+        <p>As always, if you have any questions or comments about anything I&#39;ve written, feel free to drop a comment below. Until next time, happy coding!</p>
+        </article>
+
+        <!-- scroll to top button -->
+        <button id="top">
+            <i class="material-icons">&#xe316;</i>
+        </button>
+
+        <!-- import the scripts -->
+        <script src="src/index.js"></script>
+
+        <script type="thumbnail.js" name="thumbnail">
+            set(document.getElementsByName('ski')[0])
+            size(600, 600)
+                const img = loadImage('https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Jakarta_cityscape_during_night_time%2C_taken_from_27th_floor%3B_2013.jpg/640px-Jakarta_cityscape_during_night_time%2C_taken_from_27th_floor%3B_2013.jpg', 813, 600)
+
+                imageMode(0)
+                textAlign(1, 1)
+
+                function glowText(t, x, y) {
+                  fill(0, 0, 0, 30)
+                  text(t, x, y - 5)
+                  text(t, x, y + 5)
+                  text(t, x - 5, y)
+                  text(t, x + 5, y)
+                  fill(255, 255, 255)
+                  text(t, x, y)
+                }
+
+                draw = () => {
+                    clear()
+                    image(img, 0, 0)
+
+                    noStroke()
+                    textFont('Ubuntu Mono', 80)
+                    glowText('Collision\nDetection', 300, 280)
+                    textSize(40);
+                    glowText('With HTML Canvas', 300, 400)
+                }
+        </script>
+        <canvas style="display: none" name="ski"></canvas>
+        <script src="https://cdn.jsdelivr.net/gh/thelegendski/ski.js@1.6.1/main.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/thelegendski/thumbnail.js@1.0.0/main.js"></script>
+    </body>
+</html>
