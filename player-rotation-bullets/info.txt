@@ -1,0 +1,3 @@
+[Title]: Player Rotation + Bullets
+[Description]: An example showcasing how to create a moveable player that can turn and shoot bullets in PJS.
+[URL]: https://www.khanacademy.org/computer-programming/rotation-bullets-tt/4634528175144960
